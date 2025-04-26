@@ -7,9 +7,9 @@ os.environ["OPENAI_API_KEY"] = st.secrets["API_KEY"]
 client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # 🏢 퇴사연구소 Streamlit 앱 시작
-st.set_page_config(page_title="퇴사연구소 - 재정 진단 & 추천", page_icon="🏢")
+st.set_page_config(page_title="텅장랩 - 재정 진단 & 추천", page_icon="🏢")
 
-st.title("🏢 텅장연구소 - 재정 진단 & 고금리 금융상품 추천기")
+st.title("🏢 텅장랩 - 재정 진단 & 고금리 금융상품 추천기")
 st.write("**당신의 통장, 퇴사를 허락할까? 현실적인 재정 판단과 추천을 동시에 제공합니다.**")
 
 # 사용자 입력
@@ -48,7 +48,7 @@ if st.button("퇴사 가능성 진단하기"):
 
             # 추가 기능: 고금리 상품 실시간 추천
             st.write("---")
-            st.subheader("💰 부족한 당신을 위한 고금리 예적금 상품 추천 (실시간 검색)")
+            st.subheader("💰 부족한 당신을 위한 실시간 고금리 예적금 상품 추천")
 
             try:
                 response = client.responses.create(
@@ -63,7 +63,7 @@ if st.button("퇴사 가능성 진단하기"):
                             "region": "Seoul",
                         }
                     }],
-                    input="2025년도 한국 시중은행의 고금리 예금, 적금 상품을 알려줘. 상품명, 기본금리, 우대금리, 가입 조건, 가입금액 중심으로 3개 요약해줘. 금리가 높은 순으로 각각 간결하게 요약해줘",
+                    input="2025년도 한국 시중은행의 고금리 예금, 적금 상품을 알려줘. 1.상품명, 2.최고금리(기본금리,  우대금리), 3.가입조건, 4. 가입금액을 바탕으로 3개 간결하게 요약해줘.",
                     tool_choice="required"
                 )
 
@@ -76,7 +76,7 @@ if st.button("퇴사 가능성 진단하기"):
                 for product in products:
                     if product.strip():
                         with st.container(border=True):
-                            st.markdown(f"#### 🏦 {product.strip().splitlines()[0]}")
+                            st.markdown(f"{product.strip().splitlines()[0]}")
                             for line in product.strip().splitlines()[1:]:
                                 st.markdown(f"- {line}")
 
@@ -85,14 +85,14 @@ if st.button("퇴사 가능성 진단하기"):
 
                 # 고금리 예적금 추천 끝난 뒤에 추가
     st.write("---")
-    st.subheader("💡 생활비 절약 꿀팁 추천 (실시간)")
+    st.subheader("💡 생활비 절약 실시간 꿀팁")
 
     try:
         saving_tips_response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "너는 한국 사람들에게 현실적이고 실천 가능한 생활비 절약 꿀팁을 추천하는 전문가야."},
-                {"role": "user", "content": "직장인들이 한국에서 실천할 수 있는 생활비 절약 방법 5가지 알려줘. 각 방법은 제목과 간단한 설명을 함께 적어줘. 1줄로 간결하고 실행 가능해야 해."}
+                {"role": "user", "content": "직장인들이 한국에서 실천할 수 있는 생활비 절약 방법 3가지 알려줘. 각 방법은 제목과 간단한 설명을 함께 적어줘. 1줄로 간결하고 실행 가능해야 해."}
             ]
         )
 
@@ -102,7 +102,7 @@ if st.button("퇴사 가능성 진단하기"):
         for tip in tips:
             if tip.strip():
                 with st.container(border=True):
-                    st.markdown(f"#### 🛠️ {tip.strip().splitlines()[0]}")
+                    st.markdown(f"{tip.strip().splitlines()[0]}")
                     for line in tip.strip().splitlines()[1:]:
                         st.markdown(f"- {line}")
 
@@ -113,27 +113,30 @@ if st.button("퇴사 가능성 진단하기"):
     st.write("---")
     st.subheader("🛒 알뜰 쇼핑몰 추천")
 
-    discount_shops = [
-        {
-            "name": "떠리몰",
-            "description": "유통기한 임박 상품을 저렴하게 판매하는 온라인 마켓입니다.",
-            "link": "https://www.ttorimall.com/"
-        },
-        {
-            "name": "쿠팡 반품마켓",
-            "description": "반품된 제품을 할인된 가격에 판매하는 쿠팡 서비스입니다.",
-            "link": "https://pages.coupang.com/f/special-promotion/returnmarket"
-        },
-        {
-            "name": "오늘의집 리퍼마켓",
-            "description": "인테리어 용품을 리퍼브 제품으로 저렴하게 구매할 수 있는 마켓입니다.",
-            "link": "https://ohou.se/store/refurbished"
-        }
-    ]
+    try:
+        discount_shops_response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "너는 한국 사람들에게 가성비 좋은 할인 쇼핑몰을 추천하는 전문가야."},
+                {"role": "user", "content": "한국에서 잘 알려지지 않은(떠리몰, 쿠팡 반품마켓, 오늘의집 리퍼마켓 등) 알뜰하게 쇼핑할 수 있는 온라인 쇼핑몰 3곳 추천해줘. 각각 1. 쇼핑몰 이름, 2. 간단한 특징 요약, 3. 링크를 짧고 명확하게 알려줘. 문장은 짧게 해줘."}
+            ]
+        )
 
-    for shop in discount_shops:
-        with st.container(border=True):
-            st.markdown(f"#### 🛍️ [{shop['name']}]({shop['link']})")
-            st.markdown(f"- {shop['description']}")
-    
+        discount_shops_text = discount_shops_response.choices[0].message.content
+        shops = discount_shops_text.split("\n\n")
 
+        for shop in shops:
+            if shop.strip():
+                lines = shop.strip().splitlines()
+                if len(lines) >= 3:
+                    shop_name = lines[0].replace("1.", "").strip()
+                    shop_desc = lines[1].replace("2.", "").strip()
+                    shop_link = lines[2].replace("3.", "").strip()
+
+                    with st.container(border=True):
+                        st.markdown(f"**{shop_name}**")
+                        st.markdown(f"- {shop_desc}")
+                        st.markdown(f"[🔗 쇼핑몰 바로가기]({shop_link})")
+
+    except Exception as e:
+        st.error(f"❗ 쇼핑몰 추천 검색 중 오류 발생: {e}")
